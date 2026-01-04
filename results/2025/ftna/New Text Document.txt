@@ -1,0 +1,50 @@
+# Define the source file path
+$sourceFilePath = "C:\Users\MimiHapa MEDICINE\Desktop\4M1-OG\shl_ps0801004-02.html"
+
+# Define the target folder path
+$targetFolder = "D:\onlinesyss-\results\2025\ftna"
+
+# Check if source file exists
+if (-not (Test-Path $sourceFilePath)) {
+    Write-Host "Source file not found: $sourceFilePath" -ForegroundColor Red
+    exit
+}
+
+# Check if target folder exists
+if (-not (Test-Path $targetFolder)) {
+    Write-Host "Target folder not found: $targetFolder" -ForegroundColor Red
+    exit
+}
+
+# Read the source file content
+$sourceContent = Get-Content $sourceFilePath -Raw
+
+# Find all HTML files ending with -02.html in the target folder
+$targetFiles = Get-ChildItem -Path $targetFolder -Filter "*-02.html" -File
+
+if ($targetFiles.Count -eq 0) {
+    Write-Host "No files matching '*-02.html' found in: $targetFolder" -ForegroundColor Yellow
+    exit
+}
+
+Write-Host "Found $($targetFiles.Count) file(s) matching '*-02.html' in the target folder" -ForegroundColor Green
+
+# Process each target file
+foreach ($file in $targetFiles) {
+    $filePath = $file.FullName
+    
+    # Backup the original file (optional - uncomment if needed)
+    # $backupPath = "$($file.DirectoryName)\$($file.BaseName)_backup$($file.Extension)"
+    # Copy-Item $filePath $backupPath
+    
+    try {
+        # Clear the file and write the new content
+        $sourceContent | Set-Content -Path $filePath -Encoding UTF8
+        Write-Host "✓ Updated: $($file.Name)" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "✗ Error updating: $($file.Name) - $($_.Exception.Message)" -ForegroundColor Red
+    }
+}
+
+Write-Host "`nProcess completed!" -ForegroundColor Cyan
